@@ -21,6 +21,14 @@ app.use(express.json({ limit: "2mb" }));
 
 app.get("/health", (_req, res) => res.json({ ok: true, service: "biosfix-workshop-api" }));
 
+app.get("/", (_req, res) => {
+  res.json({
+    service: "biosfix-workshop-api",
+    message: "This is the API only. Open your frontend static site URL to use BIOSFIX.",
+    health: "/health",
+  });
+});
+
 app.use("/auth", authRoutes);
 app.use("/customers", customerRoutes);
 app.use("/jobs", jobRoutes);
