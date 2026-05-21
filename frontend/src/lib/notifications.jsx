@@ -167,7 +167,7 @@ export function DashboardToastStack() {
   return (
     <div
       id="dashboard-toast-stack"
-      className="fixed z-[60] flex flex-col gap-2 items-end pointer-events-none print:hidden top-[max(4.25rem,calc(env(safe-area-inset-top,0px)+3.5rem))] right-3 sm:top-6 sm:right-6 md:top-8 md:right-8 max-w-[min(20rem,calc(100vw-1.5rem))]"
+      className="fixed z-[55] flex flex-col gap-2 items-end pointer-events-none print:hidden top-[calc(env(safe-area-inset-top,0px)+4.75rem)] right-3 md:top-8 md:right-8 max-w-[min(18rem,calc(100vw-4.5rem))]"
       aria-live="polite"
     >
       {toasts.map((t) => (
@@ -245,7 +245,7 @@ export function NotificationBellButton() {
 
       {panelOpen && (
         <div
-          className="absolute right-0 mt-2 w-[min(calc(100vw-2rem),20rem)] max-h-[min(24rem,70vh)] overflow-y-auto rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950 shadow-xl z-50 py-2 text-sm"
+          className="absolute right-0 mt-2 w-[min(calc(100vw-2rem),20rem)] max-h-[min(24rem,70vh)] overflow-y-auto rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950 shadow-xl z-[70] py-2 text-sm"
           role="menu"
         >
           {items.length === 0 ? (

@@ -124,8 +124,8 @@ export default function DashboardPage() {
   return (
     <div className="space-y-8">
       <DashboardToastStack />
-      <header className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between print:hidden">
-        <div className="min-w-0 flex-1 order-2 sm:order-1">
+      <header className="flex items-start justify-between gap-3 print:hidden">
+        <div className="min-w-0 flex-1">
           <h1 className="text-2xl sm:text-3xl font-bold tracking-tight tech-heading-gradient">
             {user?.role === "ADMIN"
               ? "Dashboard"
@@ -146,7 +146,7 @@ export default function DashboardPage() {
           )}
         </div>
         {(user?.role === "TECHNICIAN" || user?.role === "ADMIN") && (
-          <div className="order-1 sm:order-2 shrink-0 self-start sm:ml-4">
+          <div className="hidden md:block shrink-0 ml-2">
             <NotificationBellButton />
           </div>
         )}

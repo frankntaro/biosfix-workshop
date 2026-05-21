@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { NavLink, Outlet, useNavigate, useLocation } from "react-router-dom";
 import BrandLogo from "./BrandLogo.jsx";
 import { useAuth } from "../lib/auth.jsx";
-import { NotificationProvider } from "../lib/notifications.jsx";
+import { NotificationBellButton, NotificationProvider } from "../lib/notifications.jsx";
 import { roleDisplayLine } from "../lib/roleLabels.js";
 import { useOutbox } from "../lib/outbox.jsx";
 import { useTheme } from "../lib/theme.jsx";
@@ -134,12 +134,14 @@ export default function Layout() {
     </>
   );
 
-  return (
+  const showNotifications = user?.role === "TECHNICIAN" || user?.role === "ADMIN";
+
+  const appShell = (
     <div className="min-h-[100dvh] flex flex-col md:flex-row md:items-start">
-      <header className="md:hidden sticky top-0 z-30 flex items-center gap-3 border-b border-cyan-500/15 dark:border-cyan-400/10 bg-white/90 dark:bg-slate-950/90 backdrop-blur-md px-3 py-3 pt-[max(0.75rem,env(safe-area-inset-top))] shadow-sm shadow-cyan-900/5">
+      <header className="md:hidden sticky top-0 z-30 flex items-center gap-2 border-b border-cyan-500/15 dark:border-cyan-400/10 bg-white/90 dark:bg-slate-950/90 backdrop-blur-md px-3 py-3 pt-[max(0.75rem,env(safe-area-inset-top))] shadow-sm shadow-cyan-900/5">
         <button
           type="button"
-          className="rounded-lg border border-cyan-500/20 dark:border-cyan-400/20 p-2.5 text-cyan-950 dark:text-cyan-100 touch-manipulation min-h-[44px] min-w-[44px] flex items-center justify-center hover:bg-cyan-500/10 transition-colors"
+          className="shrink-0 rounded-lg border border-cyan-500/20 dark:border-cyan-400/20 p-2.5 text-cyan-950 dark:text-cyan-100 touch-manipulation min-h-[44px] min-w-[44px] flex items-center justify-center hover:bg-cyan-500/10 transition-colors"
           aria-expanded={mobileNavOpen}
           aria-controls="app-sidebar"
           aria-label={mobileNavOpen ? "Close menu" : "Open menu"}
@@ -153,9 +155,16 @@ export default function Layout() {
             <MenuIcon />
           )}
         </button>
-        <span className="font-semibold text-sm truncate bg-gradient-to-r from-cyan-800 to-teal-700 dark:from-cyan-300 dark:to-teal-300 bg-clip-text text-transparent">
+        <span className="flex-1 min-w-0 font-semibold text-sm truncate text-center bg-gradient-to-r from-cyan-800 to-teal-700 dark:from-cyan-300 dark:to-teal-300 bg-clip-text text-transparent">
           BIOSFIX WORKSHOP
         </span>
+        {showNotifications ? (
+          <div className="shrink-0">
+            <NotificationBellButton />
+          </div>
+        ) : (
+          <span className="w-[44px] shrink-0" aria-hidden />
+        )}
       </header>
 
       {mobileNavOpen && (
@@ -250,14 +259,13 @@ export default function Layout() {
             </div>
           </div>
         )}
-        {user?.role === "TECHNICIAN" || user?.role === "ADMIN" ? (
-          <NotificationProvider>
-            <Outlet />
-          </NotificationProvider>
-        ) : (
-          <Outlet />
-        )}
+        <Outlet />
       </main>
     </div>
   );
+
+  if (showNotifications) {
+    return <NotificationProvider>{appShell}</NotificationProvider>;
+  }
+  return appShell;
 }
