@@ -1,0 +1,186 @@
+generator client {
+  provider = "prisma-client-js"
+  // Avoid Windows EPERM when renaming query_engine under node_modules/.prisma (IDE/antivirus locks).
+  output   = "./generated/client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  ADMIN
+  RECEPTION
+  TECHNICIAN
+}
+
+enum RepairStatus {
+  PENDING
+  DIAGNOSING
+  IN_PROGRESS
+  WAITING_PARTS
+  COMPLETE
+  DELIVERED
+  CANCELLED
+}
+
+enum SmsCategory {
+  JOB_RECEIVED
+  REPAIR_STARTED
+  REPAIR_DIAGNOSING
+  REPAIR_IN_PROGRESS
+  WAITING_PARTS
+  REPAIR_COMPLETED
+  COLLECTION_REMINDER
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  name         String
+  role         UserRole @default(RECEPTION)
+  active       Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  activityLogs      ActivityLog[]
+  paymentsRecorded  Payment[]       @relation("PaymentRecorder")
+  assignedJobs      Job[]           @relation("AssignedTechnician")
+  repairEvents      Repair[]
+  notifications     Notification[]
+}
+
+model Customer {
+  id        String   @id @default(cuid())
+  name      String
+  phone     String
+  /// Normalized digits-only phone for deduplication (see `customerIdentity.js`).
+  phoneKey  String?
+  /// Normalized lowercase name for deduplication.
+  nameKey   String?
+  email     String?
+  address   String?
+  notes     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  devices Device[]
+  jobs    Job[]
+  smsLogs SmsLog[]
+
+  @@index([phoneKey, nameKey])
+}
+
+model Device {
+  id             String   @id @default(cuid())
+  customerId     String
+  brand          String
+  model          String
+  serialNumber   String?
+  conditionNotes String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  customer Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  jobs     Job[]
+}
+
+model Job {
+  id                    String       @id @default(cuid())
+  jobNumber             String       @unique
+  customerId            String
+  deviceId              String
+  problemDescription    String
+  status                RepairStatus @default(PENDING)
+  assignedTechnicianId  String?
+  laborCost             Decimal      @default(0) @db.Decimal(12, 2)
+  partsCost             Decimal      @default(0) @db.Decimal(12, 2)
+  receivedAt            DateTime     @default(now())
+  completedAt           DateTime?
+  deliveredAt           DateTime?
+  collectionSignature   String?
+  collectedByName       String?
+  collectedByPhone      String?
+  createdAt             DateTime     @default(now())
+  updatedAt             DateTime     @updatedAt
+
+  customer           Customer @relation(fields: [customerId], references: [id], onDelete: Restrict)
+  device             Device   @relation(fields: [deviceId], references: [id], onDelete: Restrict)
+  assignedTechnician User?    @relation("AssignedTechnician", fields: [assignedTechnicianId], references: [id])
+
+  repairs         Repair[]
+  payments        Payment[]
+  smsLogs         SmsLog[]
+  notifications   Notification[]
+}
+
+model Notification {
+  id        String    @id @default(cuid())
+  userId    String
+  jobId     String?
+  kind      String
+  title     String
+  body      String
+  readAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  job  Job? @relation(fields: [jobId], references: [id], onDelete: SetNull)
+
+  @@index([userId, readAt])
+  @@index([userId, createdAt])
+}
+
+model Repair {
+  id           String       @id @default(cuid())
+  jobId        String
+  fromStatus   RepairStatus?
+  toStatus     RepairStatus
+  notes        String?
+  technicianId String?
+  createdAt    DateTime     @default(now())
+
+  job         Job   @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  technician  User? @relation(fields: [technicianId], references: [id])
+}
+
+model Payment {
+  id          String   @id @default(cuid())
+  jobId       String
+  amount      Decimal  @db.Decimal(12, 2)
+  method      String
+  notes       String?
+  recordedById String?
+  recordedAt  DateTime @default(now())
+
+  job        Job   @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  recordedBy User? @relation("PaymentRecorder", fields: [recordedById], references: [id])
+}
+
+model SmsLog {
+  id               String      @id @default(cuid())
+  jobId            String?
+  customerId       String?
+  category         SmsCategory
+  message          String
+  status           String
+  providerResponse String?
+  createdAt        DateTime    @default(now())
+
+  job      Job?      @relation(fields: [jobId], references: [id], onDelete: SetNull)
+  customer Customer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
+}
+
+model ActivityLog {
+  id         String   @id @default(cuid())
+  userId     String?
+  action     String
+  entityType String?
+  entityId   String?
+  metadata   Json?
+  createdAt  DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+}

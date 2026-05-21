@@ -1,0 +1,23 @@
+/** Common laptop brands for quick selection on new repair jobs. */
+export const LAPTOP_BRANDS = [
+  "Dell",
+  "HP",
+  "Lenovo",
+  "Apple",
+  "Asus",
+  "Acer",
+  "MSI",
+  "Samsung",
+  "Microsoft Surface",
+  "Huawei",
+  "Toshiba",
+  "Fujitsu",
+  "Razer",
+  "LG",
+  "Google",
+  "Xiaomi",
+  "Gigabyte",
+  "Alienware",
+  "Vaio",
+  "Framework",
+];

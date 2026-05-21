@@ -1,0 +1,770 @@
+@import "tailwindcss";
+
+/* Manual theme toggle: ThemeProvider sets class "dark" on <html>. Tailwind v4 defaults dark: to prefers-color-scheme only. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --font-sans: "DM Sans", ui-sans-serif, system-ui, sans-serif;
+  --color-brand-500: #06b6d4;
+  --color-brand-600: #0891b2;
+}
+
+/* —— Tech / repair workshop motion (respects accessibility) —— */
+@keyframes tech-sweep {
+  0%,
+  100% {
+    background-position: 0% 40%;
+    opacity: 0.45;
+  }
+  50% {
+    background-position: 100% 60%;
+    opacity: 0.95;
+  }
+}
+
+@keyframes tech-pulse-ring {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(6, 182, 212, 0.35);
+  }
+  50% {
+    box-shadow: 0 0 0 10px rgba(6, 182, 212, 0);
+  }
+}
+
+@keyframes tech-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+@keyframes tech-blink {
+  0%,
+  45% {
+    opacity: 1;
+  }
+  50%,
+  100% {
+    opacity: 0.25;
+  }
+}
+
+@keyframes tech-card-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes tech-scanline {
+  0% {
+    transform: translateY(-100%);
+  }
+  100% {
+    transform: translateY(100vh);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tech-login-shell,
+  .tech-login-sheen,
+  .tech-login-card,
+  .tech-led-dot,
+  .tech-brand-float {
+    animation: none !important;
+  }
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  scroll-behavior: smooth;
+}
+
+/* ───────── Global motion polish ─────────
+   Smooth interactions everywhere without touching component files.
+   Honors prefers-reduced-motion below. */
+
+a,
+button,
+[role="button"],
+input,
+select,
+textarea,
+summary,
+label[for] {
+  transition:
+    background-color 220ms ease,
+    border-color 220ms ease,
+    color 220ms ease,
+    box-shadow 220ms ease,
+    transform 200ms cubic-bezier(0.34, 1.45, 0.64, 1),
+    opacity 200ms ease,
+    filter 200ms ease;
+  will-change: transform;
+}
+
+button:not(:disabled):hover,
+[role="button"]:not(:disabled):hover,
+a:hover {
+  filter: brightness(1.04);
+}
+
+button:not(:disabled):active,
+[role="button"]:not(:disabled):active,
+a:active {
+  transform: scale(0.98);
+}
+
+/* Soft, refined focus ring that fades in */
+:focus-visible {
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+  box-shadow:
+    0 0 0 2px rgb(6 182 212 / 0.55),
+    0 0 0 4px rgb(6 182 212 / 0.18);
+  border-radius: 0.5rem;
+  transition:
+    box-shadow 180ms ease,
+    outline-color 180ms ease;
+}
+html.dark :focus-visible {
+  box-shadow:
+    0 0 0 2px rgb(34 211 238 / 0.6),
+    0 0 0 4px rgb(34 211 238 / 0.2);
+}
+
+/* Inputs: lift the ring smoothly */
+input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]),
+select,
+textarea {
+  transition:
+    border-color 200ms ease,
+    box-shadow 220ms ease,
+    background-color 220ms ease;
+}
+input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]):hover,
+select:hover,
+textarea:hover {
+  border-color: rgb(6 182 212 / 0.55);
+}
+html.dark input:hover,
+html.dark select:hover,
+html.dark textarea:hover {
+  border-color: rgb(34 211 238 / 0.5);
+}
+
+/* Card lift utility — used by app cards via tech-glass too */
+.tech-hover-lift {
+  transition:
+    transform 260ms cubic-bezier(0.34, 1.45, 0.64, 1),
+    box-shadow 260ms ease,
+    border-color 260ms ease;
+}
+.tech-hover-lift:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 14px 40px -16px rgb(6 182 212 / 0.25),
+    0 0 0 1px rgb(6 182 212 / 0.18);
+}
+html.dark .tech-hover-lift:hover {
+  box-shadow:
+    0 14px 40px -16px rgb(34 211 238 / 0.2),
+    0 0 0 1px rgb(34 211 238 / 0.16);
+}
+
+/* Table rows feel alive */
+table tbody tr {
+  transition:
+    background-color 200ms ease,
+    transform 200ms ease;
+}
+table tbody tr:hover {
+  background-color: rgb(6 182 212 / 0.06);
+}
+html.dark table tbody tr:hover {
+  background-color: rgb(34 211 238 / 0.06);
+}
+
+/* Navigation links: a subtle slide on hover */
+nav a {
+  transition:
+    background-color 220ms ease,
+    color 220ms ease,
+    border-color 220ms ease,
+    transform 220ms cubic-bezier(0.34, 1.45, 0.64, 1),
+    box-shadow 220ms ease;
+}
+@media (min-width: 768px) {
+  nav a:not(.tech-nav-active):hover {
+    transform: translateX(2px);
+  }
+}
+
+/* Mobile menu slide-in already animated; keep tap response snappy */
+@media (hover: none) {
+  button:hover,
+  a:hover,
+  [role="button"]:hover {
+    filter: none;
+  }
+}
+
+/* Respect motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Light: clean lab / service-bench feel */
+body {
+  @apply text-slate-900 dark:text-slate-100 min-h-screen antialiased;
+  padding-left: env(safe-area-inset-left, 0px);
+  padding-right: env(safe-area-inset-right, 0px);
+  background-color: #f0f9ff;
+  background-image:
+    radial-gradient(ellipse 100% 80% at 0% -20%, rgb(6 182 212 / 0.12), transparent 55%),
+    radial-gradient(ellipse 80% 60% at 100% 0%, rgb(139 92 246 / 0.08), transparent 50%),
+    repeating-linear-gradient(90deg, transparent 0 31px, rgb(6 182 212 / 0.04) 31px 32px),
+    repeating-linear-gradient(0deg, transparent 0 31px, rgb(6 182 212 / 0.04) 31px 32px);
+  background-attachment: fixed;
+}
+
+html.dark body {
+  background-color: #020617;
+  background-image:
+    radial-gradient(ellipse 90% 70% at 15% -30%, rgb(34 211 238 / 0.14), transparent 55%),
+    radial-gradient(ellipse 70% 50% at 100% 110%, rgb(139 92 246 / 0.12), transparent 50%),
+    radial-gradient(ellipse 50% 40% at 50% 50%, rgb(8 145 178 / 0.06), transparent 70%),
+    repeating-linear-gradient(90deg, transparent 0 47px, rgb(34 211 238 / 0.035) 47px 48px),
+    repeating-linear-gradient(0deg, transparent 0 47px, rgb(34 211 238 / 0.035) 47px 48px);
+  background-attachment: fixed;
+}
+
+.tech-app-root {
+  position: relative;
+  isolation: isolate;
+}
+
+/* Subtle CRT-style scanline (very light) */
+.tech-app-root::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9999;
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    rgb(6 182 212 / 0.015) 50%,
+    transparent 100%
+  );
+  background-size: 100% 4px;
+  opacity: 0.2;
+}
+
+html.dark .tech-app-root::before {
+  background: linear-gradient(to bottom, transparent 0%, rgb(34 211 238 / 0.02) 50%, transparent 100%);
+  background-size: 100% 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tech-app-root::before {
+    display: none;
+  }
+}
+
+/* Login full-bleed tech atmosphere */
+.tech-login-shell {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, #020617 0%, #0e7490 42%, #1e1b4b 88%, #020617 100%);
+  background-size: 200% 200%;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .tech-login-shell {
+    animation: tech-login-bg-shift 18s ease-in-out infinite;
+  }
+}
+
+@keyframes tech-login-bg-shift {
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+.tech-login-sheen {
+  position: absolute;
+  inset: -50%;
+  background: linear-gradient(
+    105deg,
+    transparent 35%,
+    rgb(34 211 238 / 0.06) 48%,
+    rgb(167 139 250 / 0.08) 52%,
+    transparent 65%
+  );
+  background-size: 200% 200%;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .tech-login-sheen {
+    animation: tech-sweep 10s ease-in-out infinite;
+  }
+}
+
+.tech-login-card {
+  position: relative;
+  backdrop-filter: blur(12px);
+  border: 1px solid rgb(6 182 212 / 0.25);
+  box-shadow:
+    0 0 0 1px rgb(255 255 255 / 0.06) inset,
+    0 25px 50px -12px rgb(0 0 0 / 0.45);
+}
+
+html:not(.dark) .tech-login-card {
+  border-color: rgb(6 182 212 / 0.2);
+  box-shadow:
+    0 0 0 1px rgb(255 255 255 / 0.8) inset,
+    0 20px 40px -15px rgb(8 145 178 / 0.2);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .tech-login-card {
+    animation: tech-card-in 0.55s ease-out both;
+  }
+}
+
+/* Login background floats: wordmark ↔ logo on gradient/sheen layer (behind card) */
+.login-bg-floats {
+  contain: layout style;
+}
+
+.login-bg-spot {
+  position: absolute;
+  opacity: 0.82;
+  filter: drop-shadow(0 0 20px rgb(34 211 238 / 0.25));
+}
+
+.login-bg-spot--tl {
+  top: max(4%, env(safe-area-inset-top));
+  left: max(2%, env(safe-area-inset-left));
+  width: min(42vw, 11rem);
+}
+
+.login-bg-spot--tr {
+  top: max(6%, env(safe-area-inset-top));
+  right: max(2%, env(safe-area-inset-right));
+  width: min(42vw, 11rem);
+}
+
+.login-bg-spot--center {
+  top: max(10%, calc(env(safe-area-inset-top) + 2rem));
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(88vw, 22rem);
+  opacity: 0.55;
+}
+
+.login-bg-spot--bl {
+  bottom: max(14%, env(safe-area-inset-bottom));
+  left: max(3%, env(safe-area-inset-left));
+  width: min(40vw, 10rem);
+}
+
+.login-bg-spot--br {
+  bottom: max(12%, env(safe-area-inset-bottom));
+  right: max(3%, env(safe-area-inset-right));
+  width: min(40vw, 10rem);
+}
+
+@media (max-width: 639px) {
+  .login-bg-spot {
+    opacity: 0.72;
+  }
+
+  .login-bg-spot--center {
+    opacity: 0.38;
+    width: min(94vw, 18rem);
+  }
+
+  .login-bg-spot--tl,
+  .login-bg-spot--tr {
+    width: min(36vw, 9rem);
+  }
+
+  .login-bg-spot--bl,
+  .login-bg-spot--br {
+    width: min(34vw, 8.5rem);
+  }
+}
+
+.login-hero-stage--bg {
+  position: relative;
+  width: 100%;
+  min-height: 5.25rem;
+}
+
+.login-bg-spot--center .login-hero-stage--bg {
+  min-height: 7rem;
+}
+
+.login-hero-stage {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.login-hero-wordmark {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  text-align: center;
+  font-size: clamp(0.95rem, 3.8vw, 1.35rem);
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  line-height: 1.2;
+  text-transform: uppercase;
+  padding: 0 0.5rem;
+  background: linear-gradient(100deg, #0891b2 0%, #22d3ee 40%, #a78bfa 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  text-shadow: 0 0 40px rgb(34 211 238 / 0.35);
+  will-change: transform, opacity, filter;
+}
+
+.login-hero-wordmark--bg {
+  font-size: clamp(0.62rem, 2.2vw, 0.85rem);
+  letter-spacing: 0.1em;
+}
+
+.login-bg-spot--center .login-hero-wordmark--bg {
+  font-size: clamp(0.85rem, 3.5vw, 1.25rem);
+  letter-spacing: 0.14em;
+}
+
+.login-hero-logo-wrap {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  will-change: transform, opacity, filter;
+}
+
+.login-bg-spot-logo {
+  height: 2.75rem;
+  width: 2.75rem;
+  box-shadow: 0 8px 28px -6px rgb(6 182 212 / 0.45);
+}
+
+.login-bg-spot--center .login-bg-spot-logo {
+  height: 4rem;
+  width: 4rem;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .login-hero-wordmark {
+    animation: login-hero-text-cycle 12s cubic-bezier(0.34, 1.45, 0.64, 1) infinite;
+  }
+
+  .login-hero-logo-wrap {
+    animation: login-hero-logo-cycle 12s cubic-bezier(0.34, 1.45, 0.64, 1) infinite;
+  }
+
+  .login-bg-delay-a .login-hero-wordmark,
+  .login-bg-delay-a .login-hero-logo-wrap {
+    animation-delay: 0s;
+  }
+
+  .login-bg-delay-b .login-hero-wordmark,
+  .login-bg-delay-b .login-hero-logo-wrap {
+    animation-delay: -2.4s;
+  }
+
+  .login-bg-delay-c .login-hero-wordmark,
+  .login-bg-delay-c .login-hero-logo-wrap {
+    animation-delay: -4.8s;
+  }
+
+  .login-bg-delay-d .login-hero-wordmark,
+  .login-bg-delay-d .login-hero-logo-wrap {
+    animation-delay: -7.2s;
+  }
+
+  .login-bg-delay-e .login-hero-wordmark,
+  .login-bg-delay-e .login-hero-logo-wrap {
+    animation-delay: -9.6s;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .login-bg-floats {
+    display: none;
+  }
+}
+
+@keyframes login-hero-text-cycle {
+  0%,
+  100% {
+    opacity: 0;
+    transform: scale(0.35) translateY(28px);
+    filter: blur(8px);
+  }
+  4% {
+    opacity: 1;
+    filter: blur(0);
+  }
+  10% {
+    transform: scale(1.12) translateY(0);
+  }
+  14% {
+    transform: scale(1) translateY(0);
+  }
+  15%,
+  34% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+    filter: blur(0);
+  }
+  38% {
+    transform: scale(1.06) translateY(-4px);
+  }
+  44% {
+    opacity: 0;
+    transform: scale(1.2) translateY(-36px);
+    filter: blur(10px);
+  }
+  45%,
+  99% {
+    opacity: 0;
+    transform: scale(0.85) translateY(-48px);
+    filter: blur(12px);
+    pointer-events: none;
+  }
+}
+
+@keyframes login-hero-logo-cycle {
+  0%,
+  44% {
+    opacity: 0;
+    transform: scale(0.25) rotate(-8deg);
+    filter: blur(6px);
+  }
+  48% {
+    opacity: 1;
+    filter: blur(0);
+  }
+  54% {
+    transform: scale(1.18) rotate(0deg);
+  }
+  58% {
+    transform: scale(1) rotate(0deg);
+  }
+  59%,
+  78% {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+    filter: blur(0);
+  }
+  82% {
+    transform: scale(1.08) translateY(-6px);
+  }
+  90% {
+    opacity: 0;
+    transform: scale(1.15) translateY(32px) rotate(4deg);
+    filter: blur(8px);
+  }
+  91%,
+  100% {
+    opacity: 0;
+    transform: scale(0.7) translateY(48px);
+    filter: blur(10px);
+    pointer-events: none;
+  }
+}
+
+.tech-login-brand {
+  border-color: rgb(6 182 212 / 0.3);
+  box-shadow: 0 0 24px -8px rgb(6 182 212 / 0.25);
+}
+
+html.dark .tech-login-brand {
+  border-color: rgb(34 211 238 / 0.25);
+  box-shadow: 0 0 28px -6px rgb(34 211 238 / 0.2);
+}
+
+.tech-btn-primary {
+  background: linear-gradient(135deg, #0891b2 0%, #06b6d4 45%, #0d9488 100%);
+  box-shadow: 0 4px 14px -2px rgb(6 182 212 / 0.45);
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    filter 0.2s ease;
+}
+
+.tech-btn-primary:hover {
+  filter: brightness(1.06);
+  box-shadow: 0 6px 20px -2px rgb(34 211 238 / 0.4);
+}
+
+.tech-btn-primary:active {
+  transform: scale(0.98);
+}
+
+/* Glass panels inside app */
+.tech-glass {
+  border-radius: 0.75rem;
+  border-width: 1px;
+  border-style: solid;
+  backdrop-filter: blur(12px);
+  transition:
+    transform 320ms cubic-bezier(0.34, 1.45, 0.64, 1),
+    box-shadow 320ms ease,
+    border-color 320ms ease,
+    background-color 320ms ease;
+  border-color: rgb(6 182 212 / 0.18);
+  background: rgb(255 255 255 / 0.82);
+  box-shadow: 0 4px 24px -8px rgb(15 23 42 / 0.08);
+  will-change: transform;
+}
+
+html.dark .tech-glass {
+  border-color: rgb(34 211 238 / 0.12);
+  background: rgb(15 23 42 / 0.72);
+  box-shadow:
+    0 0 0 1px rgb(34 211 238 / 0.06) inset,
+    0 8px 32px -12px rgb(0 0 0 / 0.4);
+}
+
+.tech-glass:hover {
+  transform: translateY(-2px);
+  border-color: rgb(6 182 212 / 0.32);
+  box-shadow:
+    0 0 0 1px rgb(6 182 212 / 0.2),
+    0 18px 48px -16px rgb(6 182 212 / 0.22);
+}
+
+html.dark .tech-glass:hover {
+  border-color: rgb(34 211 238 / 0.25);
+  box-shadow:
+    0 0 0 1px rgb(34 211 238 / 0.18),
+    0 18px 48px -16px rgb(34 211 238 / 0.18);
+}
+
+/* Primary button: smoother engagement */
+.tech-btn-primary {
+  position: relative;
+  overflow: hidden;
+}
+.tech-btn-primary::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(120deg, transparent 0%, rgb(255 255 255 / 0.18) 50%, transparent 100%);
+  transform: translateX(-120%);
+  transition: transform 600ms ease;
+  pointer-events: none;
+}
+.tech-btn-primary:hover::after {
+  transform: translateX(120%);
+}
+
+/* Sidebar nav active item: subtle inner sheen on hover */
+.tech-nav-active {
+  position: relative;
+  overflow: hidden;
+}
+
+.tech-heading-gradient {
+  background: linear-gradient(90deg, #0e7490 0%, #0891b2 35%, #6366f1 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+html.dark .tech-heading-gradient {
+  background: linear-gradient(90deg, #22d3ee 0%, #2dd4bf 40%, #a78bfa 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.tech-sidebar-brand {
+  border-color: rgb(6 182 212 / 0.22);
+  background: linear-gradient(180deg, rgb(255 255 255 / 0.95) 0%, rgb(240 249 255 / 0.9) 100%);
+}
+
+html.dark .tech-sidebar-brand {
+  border-color: rgb(34 211 238 / 0.18);
+  background: linear-gradient(180deg, rgb(30 41 59 / 0.9) 0%, rgb(15 23 42 / 0.85) 100%);
+}
+
+.tech-nav-active {
+  background: linear-gradient(135deg, #0891b2 0%, #06b6d4 100%) !important;
+  box-shadow: 0 0 20px -4px rgb(6 182 212 / 0.5);
+}
+
+html.dark .tech-nav-active {
+  background: linear-gradient(135deg, #0e7490 0%, #22d3ee 100%) !important;
+  box-shadow: 0 0 24px -4px rgb(34 211 238 / 0.35);
+}
+
+.tech-led-dot {
+  width: 0.4rem;
+  height: 0.4rem;
+  border-radius: 9999px;
+  background: #22d3ee;
+  box-shadow: 0 0 8px #22d3ee;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .tech-led-dot {
+    animation: tech-blink 1.8s ease-in-out infinite;
+  }
+  .tech-brand-float {
+    animation: tech-float 4s ease-in-out infinite;
+  }
+}
+
+/* Extra bottom padding on small screens when browser chrome overlaps content */
+@media (max-width: 767px) {
+  body {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+  select,
+  textarea {
+    font-size: max(1rem, 100%);
+  }
+}

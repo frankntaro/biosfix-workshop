@@ -1,0 +1,9 @@
+# Railway: set this service root to the `backend` folder in the repo.
+# Add PostgreSQL plugin, then set DATABASE_URL (often injected automatically).
+
+[build]
+builder = "NIXPACKS"
+
+[deploy]
+startCommand = "node src/index.js"
+restartPolicyType = "ON_FAILURE"
