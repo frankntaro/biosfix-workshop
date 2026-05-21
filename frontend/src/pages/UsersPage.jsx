@@ -316,7 +316,7 @@ export default function UsersPage() {
               required
               type="email"
               autoComplete="off"
-              placeholder="name@biosfix.local"
+              placeholder="name@biosfix.com"
               className="w-full rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-950 px-3 py-2.5 sm:py-2 text-sm min-h-[44px] sm:min-h-0 focus:outline-none focus:ring-2 focus:ring-cyan-500/40"
               value={form.email}
               onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}

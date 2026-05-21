@@ -6,10 +6,10 @@ const prisma = new PrismaClient();
 async function main() {
   const hash = await bcrypt.hash("admin123", 10);
   await prisma.user.upsert({
-    where: { email: "admin@biosfix.local" },
+    where: { email: "admin@biosfix.com" },
     update: {},
     create: {
-      email: "admin@biosfix.local",
+      email: "admin@biosfix.com",
       passwordHash: hash,
       name: "System Admin",
       role: "ADMIN",
@@ -17,10 +17,10 @@ async function main() {
   });
   const recHash = await bcrypt.hash("reception123", 10);
   await prisma.user.upsert({
-    where: { email: "reception@biosfix.local" },
+    where: { email: "reception@biosfix.com" },
     update: {},
     create: {
-      email: "reception@biosfix.local",
+      email: "reception@biosfix.com",
       passwordHash: recHash,
       name: "Front Desk",
       role: "RECEPTION",
@@ -28,16 +28,16 @@ async function main() {
   });
   const techHash = await bcrypt.hash("tech123", 10);
   await prisma.user.upsert({
-    where: { email: "tech@biosfix.local" },
+    where: { email: "tech@biosfix.com" },
     update: {},
     create: {
-      email: "tech@biosfix.local",
+      email: "tech@biosfix.com",
       passwordHash: techHash,
       name: "Lead Technician",
       role: "TECHNICIAN",
     },
   });
-  console.log("Seed OK: admin@biosfix.local / admin123, reception@biosfix.local / reception123, tech@biosfix.local / tech123");
+  console.log("Seed OK: admin@biosfix.com / admin123, reception@biosfix.com / reception123, tech@biosfix.com / tech123");
 }
 
 main()

@@ -6,7 +6,7 @@ import { useAuth } from "../lib/auth.jsx";
 export default function LoginPage() {
   const { login } = useAuth();
   const nav = useNavigate();
-  const [email, setEmail] = useState("admin@biosfix.local");
+  const [email, setEmail] = useState("admin@biosfix.com");
   const [password, setPassword] = useState("admin123");
   const [showPassword, setShowPassword] = useState(false);
   const [err, setErr] = useState("");

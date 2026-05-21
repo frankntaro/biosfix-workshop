@@ -26,9 +26,9 @@ API: `http://localhost:4000` · Health: `GET /health`
 
 | Email | Password | Role |
 |--------|------------|------|
-| admin@biosfix.local | admin123 | ADMIN |
-| reception@biosfix.local | reception123 | RECEPTION |
-| tech@biosfix.local | tech123 | TECHNICIAN |
+| admin@biosfix.com | admin123 | ADMIN |
+| reception@biosfix.com | reception123 | RECEPTION |
+| tech@biosfix.com | tech123 | TECHNICIAN |
 
 ## 2. Web app
 
