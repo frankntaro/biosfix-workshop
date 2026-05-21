@@ -78,9 +78,13 @@ Repo includes `render.yaml` for a **PostgreSQL database**, **Node API** (`backen
    If Blueprint fails on `plan: free` for the static site, pull latest `main` (frontend has no `plan` in `render.yaml`).
 3. When deploy finishes, open the **biosfix-api** service → **Environment** → set **`FRONTEND_ORIGIN`** to your static site URL (e.g. `https://biosfix-web.onrender.com`, no trailing slash). Redeploy the API if needed.
 4. Optional: set `TEXTBEE_API_KEY`, `TEXTBEE_DEVICE_ID`, `WORKSHOP_PHONE` on the API service.
-5. Run seed once (Render **Shell** on API service, or locally with prod `DATABASE_URL`):
+5. **Test users** — the API build runs `npm run db:seed` automatically (Render free tier has no Shell). Logins: `admin@biosfix.com` / `admin123`, etc.
 
-   ```bash
+   To seed manually from your PC (optional): Render → **biosfix-db** → **Connections** → copy **External Database URL**, then:
+
+   ```powershell
+   cd backend
+   $env:DATABASE_URL="postgresql://..."   # paste URL
    npm run db:seed
    ```
 
