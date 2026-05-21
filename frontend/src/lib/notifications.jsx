@@ -150,47 +150,55 @@ export function NotificationProvider({ children }) {
     markOneRead,
     markAllRead,
     nav,
+    toasts,
+    onToastActivate,
+    dismissToastMarkRead,
   };
 
+  return <NotificationContext.Provider value={value}>{children}</NotificationContext.Provider>;
+}
+
+/** Toast popups — dashboard header top-right only (mobile + desktop). */
+export function DashboardToastStack() {
+  const { toasts, onToastActivate, dismissToastMarkRead } = useNotifications();
+
+  if (toasts.length === 0) return null;
+
   return (
-    <NotificationContext.Provider value={value}>
-      <div
-        id="dashboard-toast-stack"
-        className="fixed top-[max(5.5rem,env(safe-area-inset-top,0px)+4.5rem)] right-3 sm:right-6 z-[60] flex flex-col gap-2 items-end pointer-events-none print:hidden"
-      >
-        {toasts.map((t) => (
-          <div
-            key={t.key}
-            className="pointer-events-auto max-w-[min(22rem,calc(100vw-1.5rem))] w-full flex rounded-xl border border-cyan-500/25 dark:border-cyan-400/20 bg-white/95 dark:bg-slate-900/95 shadow-lg overflow-hidden backdrop-blur-sm"
+    <div
+      id="dashboard-toast-stack"
+      className="fixed z-[60] flex flex-col gap-2 items-end pointer-events-none print:hidden top-[max(4.25rem,calc(env(safe-area-inset-top,0px)+3.5rem))] right-3 sm:top-6 sm:right-6 md:top-8 md:right-8 max-w-[min(20rem,calc(100vw-1.5rem))]"
+      aria-live="polite"
+    >
+      {toasts.map((t) => (
+        <div
+          key={t.key}
+          className="pointer-events-auto w-full flex rounded-xl border border-cyan-500/25 dark:border-cyan-400/20 bg-white/95 dark:bg-slate-900/95 shadow-lg overflow-hidden backdrop-blur-sm"
+        >
+          <button
+            type="button"
+            onClick={() => onToastActivate(t)}
+            className="flex-1 text-left px-4 py-3 text-sm min-w-0"
           >
-            <button
-              type="button"
-              onClick={() => onToastActivate(t)}
-              className="flex-1 text-left px-4 py-3 text-sm min-w-0"
-            >
-              <p className="font-semibold text-slate-900 dark:text-slate-100">{t.title}</p>
-              {t.body && (
-                <p className="text-slate-600 dark:text-slate-400 mt-1 line-clamp-4 whitespace-pre-wrap">{t.body}</p>
-              )}
-              <p className="text-xs text-cyan-600 dark:text-cyan-400 mt-2">
-                {t.jobId
-                  ? "Open job — marks read. Also after 7s if ignored."
-                  : "Marks read when dismissed or after 7s."}
-              </p>
-            </button>
-            <button
-              type="button"
-              className="shrink-0 px-3 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-800 dark:hover:text-slate-200 text-xl leading-none"
-              aria-label="Dismiss and mark read"
-              onClick={() => dismissToastMarkRead(t.key, t.notifId)}
-            >
-              ×
-            </button>
-          </div>
-        ))}
-      </div>
-      {children}
-    </NotificationContext.Provider>
+            <p className="font-semibold text-slate-900 dark:text-slate-100">{t.title}</p>
+            {t.body && (
+              <p className="text-slate-600 dark:text-slate-400 mt-1 line-clamp-4 whitespace-pre-wrap">{t.body}</p>
+            )}
+            <p className="text-xs text-cyan-600 dark:text-cyan-400 mt-2">
+              {t.jobId ? "Tap to open job" : "Tap to dismiss"}
+            </p>
+          </button>
+          <button
+            type="button"
+            className="shrink-0 px-3 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-800 dark:hover:text-slate-200 text-xl leading-none"
+            aria-label="Dismiss and mark read"
+            onClick={() => dismissToastMarkRead(t.key, t.notifId)}
+          >
+            ×
+          </button>
+        </div>
+      ))}
+    </div>
   );
 }
 

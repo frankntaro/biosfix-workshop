@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import PasswordInput from "../components/PasswordInput.jsx";
 import { api, setToken } from "../lib/api.js";
 import { useAuth } from "../lib/auth.jsx";
 
@@ -95,39 +96,27 @@ export default function AccountPage() {
 
       <form onSubmit={savePassword} className="space-y-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 p-4">
         <h2 className="font-semibold text-sky-600 text-sm">Change password</h2>
-        <div>
-          <label className="block text-xs font-medium text-slate-600 dark:text-slate-300 mb-1">Current password</label>
-          <input
-            required
-            type="password"
-            autoComplete="current-password"
-            className="w-full rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-950 px-3 py-2 text-sm"
-            value={pwd.current}
-            onChange={(e) => setPwd((p) => ({ ...p, current: e.target.value }))}
-          />
-        </div>
-        <div>
-          <label className="block text-xs font-medium text-slate-600 dark:text-slate-300 mb-1">New password (min 6 characters)</label>
-          <input
-            required
-            type="password"
-            autoComplete="new-password"
-            className="w-full rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-950 px-3 py-2 text-sm"
-            value={pwd.next}
-            onChange={(e) => setPwd((p) => ({ ...p, next: e.target.value }))}
-          />
-        </div>
-        <div>
-          <label className="block text-xs font-medium text-slate-600 dark:text-slate-300 mb-1">Confirm new password</label>
-          <input
-            required
-            type="password"
-            autoComplete="new-password"
-            className="w-full rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-950 px-3 py-2 text-sm"
-            value={pwd.confirm}
-            onChange={(e) => setPwd((p) => ({ ...p, confirm: e.target.value }))}
-          />
-        </div>
+        <PasswordInput
+          id="pwd-current"
+          label="Current password"
+          value={pwd.current}
+          onChange={(e) => setPwd((p) => ({ ...p, current: e.target.value }))}
+          autoComplete="current-password"
+        />
+        <PasswordInput
+          id="pwd-new"
+          label="New password (min 6 characters)"
+          value={pwd.next}
+          onChange={(e) => setPwd((p) => ({ ...p, next: e.target.value }))}
+          autoComplete="new-password"
+        />
+        <PasswordInput
+          id="pwd-confirm"
+          label="Confirm new password"
+          value={pwd.confirm}
+          onChange={(e) => setPwd((p) => ({ ...p, confirm: e.target.value }))}
+          autoComplete="new-password"
+        />
         <button
           type="submit"
           className="w-full sm:w-auto rounded-lg bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 px-4 py-3 sm:py-2 text-sm font-medium touch-manipulation min-h-[44px] sm:min-h-0"

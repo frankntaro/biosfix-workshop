@@ -5,7 +5,7 @@ import { useAuth } from "../lib/auth.jsx";
 import { useOutbox } from "../lib/outbox.jsx";
 import * as idb from "../lib/offlineDb.js";
 import { JobDeviceSummary, JobDeviceTableCells, JobDeviceTableHead } from "../components/JobDeviceTableCells.jsx";
-import { NotificationBellButton } from "../lib/notifications.jsx";
+import { DashboardToastStack, NotificationBellButton } from "../lib/notifications.jsx";
 import { TECH_QUICK_STATUSES, statusBadgeClass, statusDescription, statusLabel } from "../lib/status.js";
 
 export default function DashboardPage() {
@@ -123,6 +123,7 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-8">
+      <DashboardToastStack />
       <header className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between print:hidden">
         <div className="min-w-0 flex-1 order-2 sm:order-1">
           <h1 className="text-2xl sm:text-3xl font-bold tracking-tight tech-heading-gradient">
