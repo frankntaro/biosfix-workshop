@@ -69,6 +69,31 @@ The PWA still precaches the app shell. In addition:
 - **Sync:** When the browser goes **online**, after **login**, or when you press **Sync now** in the sidebar, queued jobs are posted to `POST /jobs` in order. A mutex prevents duplicate parallel syncs.
 - **Limits:** Only **new job creation** is queued (not payments or status changes). If the session expires (401), fix auth and tap **Sync now** again.
 
+## Deploy on Render (GitHub → Blueprint)
+
+Repo includes `render.yaml` for a **PostgreSQL database**, **Node API** (`backend/`), and **static frontend** (`frontend/`).
+
+1. Push this repo to GitHub (`frankntaro/biosfix-workshop`).
+2. [Render Dashboard](https://dashboard.render.com/) → **New** → **Blueprint** → connect the repo → apply `render.yaml`.
+3. When deploy finishes, open the **biosfix-api** service → **Environment** → set **`FRONTEND_ORIGIN`** to your static site URL (e.g. `https://biosfix-web.onrender.com`, no trailing slash). Redeploy the API if needed.
+4. Optional: set `TEXTBEE_API_KEY`, `TEXTBEE_DEVICE_ID`, `WORKSHOP_PHONE` on the API service.
+5. Run seed once (Render **Shell** on API service, or locally with prod `DATABASE_URL`):
+
+   ```bash
+   npm run db:seed
+   ```
+
+`VITE_API_PREFIX` is wired from the API’s public URL at build time. CORS requires `FRONTEND_ORIGIN` to match the static site exactly.
+
+### Manual Render setup (without Blueprint)
+
+| Service | Root directory | Build | Start / publish |
+|---------|----------------|-------|-----------------|
+| **Web Service** (API) | `backend` | `npm install && npx prisma generate && npx prisma db push` | `npm start` |
+| **Static Site** (UI) | `frontend` | `npm install && npm run build` | Publish directory: `dist` |
+
+Static site build env: `VITE_API_PREFIX` = `https://your-api-name.onrender.com` (no trailing slash).
+
 ## Deploy on Railway (recommended layout)
 
 Use **two** Railway services from the same GitHub repo.
