@@ -37,11 +37,11 @@ services:
       - key: TEXTBEE_DEFAULT_COUNTRY_CODE
         value: "255"
 
+  # Static sites: do not set `plan` (not valid for runtime: static; site is free by default)
   - type: web
     name: biosfix-web
     runtime: static
     rootDir: frontend
-    plan: free
     buildCommand: npm install && npm run build
     staticPublishPath: dist
     envVars:

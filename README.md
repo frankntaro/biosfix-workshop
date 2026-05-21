@@ -74,7 +74,8 @@ The PWA still precaches the app shell. In addition:
 Repo includes `render.yaml` for a **PostgreSQL database**, **Node API** (`backend/`), and **static frontend** (`frontend/`).
 
 1. Push this repo to GitHub (`frankntaro/biosfix-workshop`).
-2. [Render Dashboard](https://dashboard.render.com/) → **New** → **Blueprint** → connect the repo → apply `render.yaml`.
+2. [Render Dashboard](https://dashboard.render.com/) → **New** → **Blueprint** → connect the repo → apply `render.yaml`.  
+   If Blueprint fails on `plan: free` for the static site, pull latest `main` (frontend has no `plan` in `render.yaml`).
 3. When deploy finishes, open the **biosfix-api** service → **Environment** → set **`FRONTEND_ORIGIN`** to your static site URL (e.g. `https://biosfix-web.onrender.com`, no trailing slash). Redeploy the API if needed.
 4. Optional: set `TEXTBEE_API_KEY`, `TEXTBEE_DEVICE_ID`, `WORKSHOP_PHONE` on the API service.
 5. Run seed once (Render **Shell** on API service, or locally with prod `DATABASE_URL`):
