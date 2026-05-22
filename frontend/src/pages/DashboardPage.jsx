@@ -6,6 +6,7 @@ import { useOutbox } from "../lib/outbox.jsx";
 import * as idb from "../lib/offlineDb.js";
 import { JobDeviceSummary, JobDeviceTableCells, JobDeviceTableHead } from "../components/JobDeviceTableCells.jsx";
 import { DashboardToastStack, NotificationBellButton } from "../lib/notifications.jsx";
+import { dashboardSubtitle, dashboardTitle } from "../lib/roleLabels.js";
 import { TECH_QUICK_STATUSES, statusBadgeClass, statusDescription, statusLabel } from "../lib/status.js";
 
 export default function DashboardPage() {
@@ -96,6 +97,14 @@ export default function DashboardPage() {
     };
   }, [user?.role]);
 
+  useEffect(() => {
+    const title = dashboardTitle(user?.role);
+    document.title = title ? `${title} · BIOSFIX` : "BIOSFIX Workshop";
+    return () => {
+      document.title = "BIOSFIX Workshop";
+    };
+  }, [user?.role]);
+
   if (err) return <p className="text-red-600">{err}</p>;
   if (!data) return (
     <div className="flex items-center gap-3 text-slate-600 dark:text-cyan-200/80 py-8">
@@ -104,19 +113,22 @@ export default function DashboardPage() {
     </div>
   );
 
-  const cards = [
+  const isAdmin = user?.role === "ADMIN";
+  const isReception = user?.role === "RECEPTION";
+  const isTechScope = data.scopedToTechnician === true;
+
+  const jobStatCards = [
     { label: "Jobs today", value: data.totalJobsToday },
     { label: "Pending", value: data.pendingJobs, to: "/jobs?status=PENDING" },
     { label: "Completed", value: data.completedJobs, to: "/jobs?status=COMPLETE" },
     { label: "Under repair", value: data.devicesUnderRepair, to: "/jobs?status=IN_PROGRESS" },
+  ];
+  const revenueCards = [
     { label: "Revenue today", value: `TZS ${data.revenueToday.toLocaleString()}` },
     { label: "Revenue (week)", value: `TZS ${data.revenueWeek.toLocaleString()}` },
     { label: "Revenue (month)", value: `TZS ${data.revenueMonth.toLocaleString()}` },
   ];
-
-  const isTechScope = data.scopedToTechnician === true;
-  const isAdmin = user?.role === "ADMIN";
-  const isReception = user?.role === "RECEPTION";
+  const cards = isTechScope ? jobStatCards : [...jobStatCards, ...revenueCards];
   const showTodayIntakes = !isTechScope && (isReception || isAdmin);
   const showWorkshopQuickActions = isTechScope || isAdmin;
   const showOpsShortcuts = isReception || isAdmin;
@@ -127,17 +139,11 @@ export default function DashboardPage() {
       <header className="flex items-start justify-between gap-3 print:hidden">
         <div className="min-w-0 flex-1">
           <h1 className="text-2xl sm:text-3xl font-bold tracking-tight tech-heading-gradient">
-            {user?.role === "ADMIN"
-              ? "Dashboard"
-              : user?.role === "RECEPTION"
-                ? "Reception"
-                : user?.role === "TECHNICIAN"
-                  ? "Workshop"
-                  : "Dashboard"}
+            {dashboardTitle(user?.role)}
           </h1>
           <p className="text-slate-600 dark:text-cyan-200/70 text-sm mt-2 flex flex-wrap items-center gap-2">
             <span className="tech-led-dot shrink-0" aria-hidden />
-            {isTechScope ? "Assigned jobs" : isAdmin ? "Workshop overview" : "Overview"}
+            {dashboardSubtitle(user?.role, { scopedToTechnician: isTechScope })}
           </p>
           {fromCache && (
             <p className="text-sm text-amber-800 dark:text-amber-200 mt-2 rounded-lg border border-amber-200 dark:border-amber-800 bg-amber-50/90 dark:bg-amber-950/40 px-3 py-2 max-w-2xl print:hidden">

@@ -3,7 +3,7 @@ import { NavLink, Outlet, useNavigate, useLocation } from "react-router-dom";
 import BrandLogo from "./BrandLogo.jsx";
 import { useAuth } from "../lib/auth.jsx";
 import { NotificationBellButton, NotificationProvider } from "../lib/notifications.jsx";
-import { roleDisplayLine } from "../lib/roleLabels.js";
+import { dashboardNavLabel, roleDisplayLine } from "../lib/roleLabels.js";
 import { useOutbox } from "../lib/outbox.jsx";
 import { useTheme } from "../lib/theme.jsx";
 import { usePwa } from "../lib/pwa.jsx";
@@ -63,7 +63,7 @@ export default function Layout() {
       </div>
       <nav className="flex flex-col gap-1 w-full" aria-label="Main navigation">
         <NavLink to="/" end className={linkClass} onClick={() => setMobileNavOpen(false)}>
-          Dashboard
+          {dashboardNavLabel(user?.role)}
         </NavLink>
         <NavLink to="/jobs" className={linkClass} onClick={() => setMobileNavOpen(false)}>
           {user?.role === "TECHNICIAN" ? "My jobs" : "Jobs"}
