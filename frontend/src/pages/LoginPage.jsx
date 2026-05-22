@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import AppFooter from "../components/AppFooter.jsx";
 import BrandLogo from "../components/BrandLogo.jsx";
 import PasswordInput from "../components/PasswordInput.jsx";
 import { useAuth } from "../lib/auth.jsx";
@@ -34,7 +35,7 @@ export default function LoginPage() {
   );
 
   return (
-    <div className="tech-login-shell min-h-[100dvh] relative flex items-center justify-center px-4 py-8 sm:p-6 pt-[max(2rem,env(safe-area-inset-top))] pb-[max(2rem,env(safe-area-inset-bottom))]">
+    <div className="tech-login-shell min-h-[100dvh] relative flex flex-col px-4 py-6 sm:p-6 pt-[max(2rem,env(safe-area-inset-top))]">
       <div className="tech-login-sheen absolute inset-0 z-[1]" aria-hidden />
       <div className="login-bg-floats pointer-events-none absolute inset-0 z-[5] overflow-hidden" aria-hidden>
         {bgSpot("login-bg-spot--tl", "login-bg-delay-a")}
@@ -43,7 +44,8 @@ export default function LoginPage() {
         {bgSpot("login-bg-spot--bl", "login-bg-delay-d")}
         {bgSpot("login-bg-spot--br", "login-bg-delay-e")}
       </div>
-      <div className="relative z-10 w-full max-w-md min-w-0 flex flex-col items-center px-1">
+      <div className="relative z-10 flex-1 w-full flex flex-col items-center justify-center px-1 py-4">
+        <div className="w-full max-w-md min-w-0">
         <div className="tech-login-card w-full rounded-2xl bg-white/95 dark:bg-slate-900/90 p-5 sm:p-8">
           <div
             className="tech-login-brand mx-auto mb-5 sm:mb-6 flex w-full max-w-[min(280px,100%)] flex-col items-center gap-3 rounded-xl border bg-slate-50/90 dark:bg-slate-800/80 px-3 py-4 sm:px-4 text-center"
@@ -82,7 +84,9 @@ export default function LoginPage() {
             </button>
           </form>
         </div>
+        </div>
       </div>
+      <AppFooter className="relative z-10 text-cyan-900/70 dark:text-cyan-200/60" />
     </div>
   );
 }

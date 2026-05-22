@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { NavLink, Outlet, useNavigate, useLocation } from "react-router-dom";
+import AppFooter from "./AppFooter.jsx";
 import BrandLogo from "./BrandLogo.jsx";
 import { useAuth } from "../lib/auth.jsx";
 import { NotificationBellButton, NotificationProvider } from "../lib/notifications.jsx";
@@ -195,7 +196,8 @@ export default function Layout() {
         <div className="flex flex-col gap-6 flex-1 md:pt-0 pt-8">{sidebarInner}</div>
       </aside>
 
-      <main className="flex-1 min-w-0 w-full p-3 sm:p-6 md:p-8 pb-[max(1rem,env(safe-area-inset-bottom))] max-w-6xl mx-auto">
+      <main className="flex-1 min-w-0 w-full flex flex-col max-w-6xl mx-auto">
+        <div className="flex-1 w-full p-3 sm:p-6 md:p-8">
         {needsRefresh && (
           <div
             role="status"
@@ -260,6 +262,8 @@ export default function Layout() {
           </div>
         )}
         <Outlet />
+        </div>
+        <AppFooter className="border-t border-cyan-500/10 dark:border-cyan-400/10 mt-auto w-full" />
       </main>
     </div>
   );
