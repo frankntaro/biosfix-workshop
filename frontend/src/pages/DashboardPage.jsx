@@ -132,10 +132,11 @@ export default function DashboardPage() {
   const showTodayIntakes = !isTechScope && (isReception || isAdmin);
   const showWorkshopQuickActions = isTechScope || isAdmin;
   const showOpsShortcuts = isReception || isAdmin;
+  const showNotifications = user?.role === "TECHNICIAN" || user?.role === "ADMIN";
 
   return (
     <div className="space-y-8">
-      <DashboardToastStack />
+      {showNotifications && <DashboardToastStack />}
       <header className="flex items-start justify-between gap-3 print:hidden">
         <div className="min-w-0 flex-1">
           <h1 className="text-2xl sm:text-3xl font-bold tracking-tight tech-heading-gradient">
@@ -151,7 +152,7 @@ export default function DashboardPage() {
             </p>
           )}
         </div>
-        {(user?.role === "TECHNICIAN" || user?.role === "ADMIN") && (
+        {showNotifications && (
           <div className="hidden md:block shrink-0 ml-2">
             <NotificationBellButton />
           </div>
