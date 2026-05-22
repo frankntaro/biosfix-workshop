@@ -160,7 +160,9 @@ export function NotificationProvider({ children }) {
 
 /** Toast popups — dashboard header top-right only (mobile + desktop). */
 export function DashboardToastStack() {
-  const { toasts, onToastActivate, dismissToastMarkRead } = useNotifications();
+  const ctx = useContext(NotificationContext);
+  if (!ctx) return null;
+  const { toasts, onToastActivate, dismissToastMarkRead } = ctx;
 
   if (toasts.length === 0) return null;
 

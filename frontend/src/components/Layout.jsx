@@ -252,8 +252,5 @@ export default function Layout() {
     </div>
   );
 
-  if (showNotifications) {
-    return <NotificationProvider>{appShell}</NotificationProvider>;
-  }
-  return appShell;
+  return <NotificationProvider>{appShell}</NotificationProvider>;
 }
