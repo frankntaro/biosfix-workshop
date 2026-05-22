@@ -9,7 +9,6 @@ const CREATE_ROLES = [
   {
     id: "RECEPTION",
     label: "Reception",
-    blurb: "Books in customers, creates jobs, records payments.",
     accent:
       "from-cyan-500/10 to-teal-500/5 border-cyan-500/30 text-cyan-900 dark:text-cyan-100 dark:border-cyan-400/30",
     icon: (
@@ -21,7 +20,6 @@ const CREATE_ROLES = [
   {
     id: "TECHNICIAN",
     label: "Technician",
-    blurb: "Diagnoses devices, updates job status, completes repairs.",
     accent:
       "from-indigo-500/10 to-violet-500/5 border-indigo-500/30 text-indigo-900 dark:text-indigo-100 dark:border-indigo-400/30",
     icon: (
@@ -207,9 +205,6 @@ export default function UsersPage() {
           Administration
         </p>
         <h1 className="text-xl sm:text-2xl font-bold tech-heading-gradient">Users & access</h1>
-        <p className="mt-1 text-sm text-slate-600 dark:text-slate-300 max-w-2xl">
-          Create staff accounts for Reception and Technician roles. Admin accounts are managed by the system.
-        </p>
       </header>
 
       {/* ───── Create user ───── */}
@@ -265,7 +260,6 @@ export default function UsersPage() {
                     </span>
                     <div className="min-w-0">
                       <p className="font-semibold text-sm">{r.label}</p>
-                      <p className="text-xs opacity-80 mt-0.5">{r.blurb}</p>
                     </div>
                   </div>
                   <span
@@ -434,9 +428,6 @@ export default function UsersPage() {
                 </button>
               </div>
             </dl>
-            <p className="text-[11px] text-emerald-800/80 dark:text-emerald-200/80">
-              Share these credentials privately. The user can change their password under <strong>My account</strong>.
-            </p>
           </div>
         )}
       </section>
@@ -580,11 +571,6 @@ export default function UsersPage() {
                   value={edit.newPassword}
                   onChange={(e) => setEdit((x) => ({ ...x, newPassword: e.target.value }))}
                 />
-                {canAdminResetPassword(edit) && (
-                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                    Set a temporary password and ask them to sign in and change it under My account.
-                  </p>
-                )}
               </div>
               {err && edit && <p className="text-red-600 dark:text-red-400 text-sm">{err}</p>}
               <div className="flex flex-col-reverse gap-2 pt-2 sm:flex-row sm:justify-end">
