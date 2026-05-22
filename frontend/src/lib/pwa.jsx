@@ -71,11 +71,15 @@ export function PwaProvider({ children }) {
   const promptInstall = useCallback(async () => {
     const e = deferredPromptRef.current;
     if (!e) return { outcome: "unavailable" };
-    e.prompt();
-    const choice = await e.userChoice.catch(() => ({ outcome: "dismissed" }));
-    deferredPromptRef.current = null;
-    setInstallable(false);
-    return choice;
+    try {
+      await e.prompt();
+      const choice = await e.userChoice.catch(() => ({ outcome: "dismissed" }));
+      deferredPromptRef.current = null;
+      setInstallable(false);
+      return choice;
+    } catch (err) {
+      return { outcome: "error", message: String(err) };
+    }
   }, []);
 
   const update = useCallback(async () => {

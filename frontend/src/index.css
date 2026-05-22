@@ -25,6 +25,10 @@ body.install-prompt-open main {
   padding-bottom: 3.5rem;
 }
 
+body.install-prompt-open:has([aria-modal="true"]) main {
+  padding-bottom: 0;
+}
+
 @keyframes tech-sweep {
   0%,
   100% {
