@@ -63,7 +63,11 @@ Uses [pdfkit](https://pdfkit.org/) on the server; activity is logged as `job.inv
 
 ## Offline queue and sync
 
-The PWA still precaches the app shell. In addition:
+The PWA precaches the app shell (JS/CSS/HTML). **You must open the app once while online and signed in** so jobs/customers/dashboard data is stored on the device. After that, when offline you can browse cached lists, open cached job details, and queue new jobs.
+
+In production the API is on a separate host (`VITE_API_PREFIX`); the service worker and IndexedDB both support that layout. If you were logged out when going offline, sign in once online first — the session is kept locally when the network drops.
+
+In addition:
 
 - **New job while offline:** Submitting **New job** stores a `CREATE_JOB` payload in **IndexedDB** (`biosfix-workshop` / `outbox`). You are redirected to Jobs with a confirmation banner.
 - **Sync:** When the browser goes **online**, after **login**, or when you press **Sync now** in the sidebar, queued jobs are posted to `POST /jobs` in order. A mutex prevents duplicate parallel syncs.

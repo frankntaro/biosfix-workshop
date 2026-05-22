@@ -1,8 +1,6 @@
-const prefix = import.meta.env.VITE_API_PREFIX ?? "/api";
+import { getToken, setToken } from "./authSession.js";
 
-function getToken() {
-  return localStorage.getItem("biosfix_token");
-}
+const prefix = import.meta.env.VITE_API_PREFIX ?? "/api";
 
 export async function api(path, options = {}) {
   const headers = { ...(options.headers || {}) };
@@ -121,8 +119,4 @@ export async function downloadFile(path, fallbackFilename = "download") {
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
-export { getToken };
-export function setToken(t) {
-  if (t) localStorage.setItem("biosfix_token", t);
-  else localStorage.removeItem("biosfix_token");
-}
+export { getToken, setToken };
