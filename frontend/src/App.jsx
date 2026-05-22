@@ -12,6 +12,7 @@ import ReportsPage from "./pages/ReportsPage.jsx";
 import ActivityPage from "./pages/ActivityPage.jsx";
 import UsersPage from "./pages/UsersPage.jsx";
 import AccountPage from "./pages/AccountPage.jsx";
+import InstallAppPrompt from "./components/InstallAppPrompt.jsx";
 
 function PrivateRoute({ children }) {
   const { user, loading } = useAuth();
@@ -42,6 +43,7 @@ function ReceptionOrAdmin({ children }) {
 export default function App() {
   return (
     <div className="tech-app-root min-h-[100dvh]">
+      <InstallAppPrompt />
       <Routes>
       <Route path="/login" element={<LoginPage />} />
       <Route

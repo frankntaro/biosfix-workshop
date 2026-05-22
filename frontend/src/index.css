@@ -10,6 +10,21 @@
 }
 
 /* —— Tech / repair workshop motion (respects accessibility) —— */
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+body.install-prompt-open main {
+  padding-bottom: 9rem;
+}
+
 @keyframes tech-sweep {
   0%,
   100% {

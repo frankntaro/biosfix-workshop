@@ -28,7 +28,7 @@ export default function Layout() {
   const { user, logout } = useAuth();
   const { dark, toggle } = useTheme();
   const { online, pendingCount, lastError, flushOutbox } = useOutbox();
-  const { installable, installed, promptInstall, needsRefresh, offlineReady, update, dismissRefresh } = usePwa();
+  const { needsRefresh, offlineReady, update, dismissRefresh } = usePwa();
   const nav = useNavigate();
   const location = useLocation();
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
@@ -97,22 +97,6 @@ export default function Layout() {
         </NavLink>
       </nav>
       <div className="mt-auto flex flex-col gap-2 w-full pb-[env(safe-area-inset-bottom,0px)]">
-        {installable && !installed && (
-          <button
-            type="button"
-            onClick={() => {
-              setMobileNavOpen(false);
-              promptInstall();
-            }}
-            className="w-full rounded-lg border border-emerald-500/30 dark:border-emerald-400/25 bg-emerald-50/70 dark:bg-emerald-950/30 px-3 py-2.5 md:py-2 text-sm min-h-[44px] md:min-h-0 hover:bg-emerald-100/70 dark:hover:bg-emerald-900/30 text-emerald-900 dark:text-emerald-100 touch-manipulation transition-colors flex items-center justify-center gap-2 font-medium"
-            aria-label="Install BIOSFIX as an app"
-          >
-            <svg className="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v12m0 0l-4-4m4 4l4-4M4 20h16" />
-            </svg>
-            Install app
-          </button>
-        )}
         <button
           type="button"
           onClick={toggle}
