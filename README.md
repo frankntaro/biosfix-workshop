@@ -146,6 +146,25 @@ See `frontend/.env.production.example`.
 - Any Node host can run the API with the same env vars as local.
 - Any static host (Netlify, Cloudflare Pages, S3+CloudFront) can serve `frontend/dist` with `VITE_API_PREFIX` set at **build** time.
 
+## Security
+
+The API is hardened against common web attacks:
+
+| Threat | Protection |
+|--------|------------|
+| **SQL injection** | [Prisma](https://www.prisma.io/) uses parameterized queries only (no raw SQL from user input). |
+| **XSS (scripting)** | User text is stripped of HTML tags on the server; React escapes output in the UI. |
+| **Brute-force login** | Rate limit on `POST /auth/login` (15 attempts / 15 min per IP in production). |
+| **API abuse** | Global rate limit per IP; JSON body size capped at 512 KB. |
+| **Bad IDs** | Route IDs must match valid `cuid` format before hitting the database. |
+| **Prototype pollution** | `$` / `__proto__` keys removed from JSON bodies. |
+| **Headers** | [Helmet](https://helmetjs.github.io/) security headers; `X-Powered-By` disabled. |
+| **CORS** | Only `FRONTEND_ORIGIN` may call the API with credentials. |
+| **Secrets** | Production refuses to start with a weak or default `JWT_SECRET`. |
+| **Passwords** | bcrypt hashing; new passwords must be 8+ characters. |
+
+**Production checklist:** set a strong `JWT_SECRET`, exact `FRONTEND_ORIGIN`, HTTPS on both sites, change seed passwords after first deploy, keep `TEXTBEE_*` keys only on the server.
+
 ## Project layout
 
 - `backend/` — Express API, Prisma, SMS, PDF invoices, `railway.toml`

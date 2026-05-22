@@ -26,6 +26,8 @@ services:
           property: connectionString
       - key: JWT_SECRET
         generateValue: true
+      - key: NODE_ENV
+        value: production
       - key: FRONTEND_ORIGIN
         sync: false
       - key: TEXTBEE_API_KEY

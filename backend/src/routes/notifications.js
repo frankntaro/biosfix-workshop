@@ -1,9 +1,11 @@
 import { Router } from "express";
 import { prisma } from "../db.js";
 import { authMiddleware } from "../middleware/auth.js";
+import { bindCuidParams } from "../lib/validate.js";
 
 const r = Router();
 r.use(authMiddleware);
+bindCuidParams(r, "id");
 
 r.get("/", async (req, res) => {
   const items = await prisma.notification.findMany({

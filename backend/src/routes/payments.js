@@ -1,9 +1,11 @@
 import { Router } from "express";
 import { prisma } from "../db.js";
 import { authMiddleware, requireRole } from "../middleware/auth.js";
+import { bindCuidParams, isCuid, sanitizeText } from "../lib/validate.js";
 
 const r = Router();
 r.use(authMiddleware);
+bindCuidParams(r, "jobId");
 
 function num(v) {
   const n = Number(v);
@@ -14,16 +16,17 @@ function num(v) {
 r.post("/", requireRole("ADMIN", "RECEPTION"), async (req, res) => {
   const { jobId, amount, method, notes } = req.body || {};
   const a = num(amount);
-  if (!jobId || a == null || a < 0) return res.status(400).json({ error: "jobId and valid amount required" });
-  if (!method) return res.status(400).json({ error: "method required" });
+  if (!isCuid(jobId) || a == null || a < 0) return res.status(400).json({ error: "jobId and valid amount required" });
+  const methodT = sanitizeText(method, 40);
+  if (!methodT) return res.status(400).json({ error: "method required" });
   const job = await prisma.job.findUnique({ where: { id: jobId } });
   if (!job) return res.status(404).json({ error: "Job not found" });
   const payment = await prisma.payment.create({
     data: {
       jobId,
       amount: a,
-      method,
-      notes: notes || null,
+      method: methodT,
+      notes: notes != null ? sanitizeText(notes, 500) || null : null,
       recordedById: req.user.sub,
     },
   });

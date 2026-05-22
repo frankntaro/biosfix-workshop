@@ -4,12 +4,14 @@ import { prisma } from "../db.js";
 import { authMiddleware, requireRole } from "../middleware/auth.js";
 import { customerIdentityKeys } from "../lib/customerIdentity.js";
 import { paginatedResult, parsePageQuery } from "../lib/pagination.js";
+import { bindCuidParams, clampSearchQuery, sanitizeText, validateEmail } from "../lib/validate.js";
 
 const r = Router();
 r.use(authMiddleware);
+bindCuidParams(r, "id");
 
 r.get("/", requireRole("ADMIN", "RECEPTION", "TECHNICIAN"), async (req, res) => {
-  const q = (req.query.q || "").trim();
+  const q = clampSearchQuery(req.query.q);
   const qWhere = q
     ? {
         OR: [
@@ -39,9 +41,13 @@ r.get("/", requireRole("ADMIN", "RECEPTION", "TECHNICIAN"), async (req, res) => 
 
 r.post("/", requireRole("ADMIN", "RECEPTION"), async (req, res) => {
   const { name, phone, email, address, notes } = req.body || {};
-  const nameT = typeof name === "string" ? name.trim() : "";
-  const phoneT = typeof phone === "string" ? phone.trim() : "";
+  const nameT = sanitizeText(name, 120);
+  const phoneT = sanitizeText(phone, 40);
   if (!nameT || !phoneT) return res.status(400).json({ error: "name and phone required" });
+  const emailNorm = email != null && String(email).trim() ? validateEmail(email) : null;
+  if (email != null && String(email).trim() && !emailNorm) {
+    return res.status(400).json({ error: "Invalid email" });
+  }
 
   const { phoneKey, nameKey } = customerIdentityKeys(nameT, phoneT);
   if (!phoneKey) return res.status(400).json({ error: "phone must include digits" });
@@ -63,9 +69,9 @@ r.post("/", requireRole("ADMIN", "RECEPTION"), async (req, res) => {
             phone: phoneT,
             phoneKey,
             nameKey,
-            email: typeof email === "string" && email.trim() ? email.trim() : null,
-            address: typeof address === "string" && address.trim() ? address.trim() : null,
-            notes: typeof notes === "string" && notes.trim() ? notes.trim() : null,
+            email: emailNorm,
+            address: address != null ? sanitizeText(address, 300) || null : null,
+            notes: notes != null ? sanitizeText(notes, 2000) || null : null,
           },
         });
         return { type: "created", customer };
@@ -115,11 +121,11 @@ r.patch("/:id", requireRole("ADMIN", "RECEPTION", "TECHNICIAN"), async (req, res
   }
 
   const { name, phone, email, address, notes } = req.body || {};
-  if (name !== undefined && !String(name).trim()) return res.status(400).json({ error: "name cannot be empty" });
-  if (phone !== undefined && !String(phone).trim()) return res.status(400).json({ error: "phone cannot be empty" });
+  if (name !== undefined && !sanitizeText(name, 120)) return res.status(400).json({ error: "name cannot be empty" });
+  if (phone !== undefined && !sanitizeText(phone, 40)) return res.status(400).json({ error: "phone cannot be empty" });
 
-  const nextName = name !== undefined ? String(name).trim() : existing.name;
-  const nextPhone = phone !== undefined ? String(phone).trim() : existing.phone;
+  const nextName = name !== undefined ? sanitizeText(name, 120) : existing.name;
+  const nextPhone = phone !== undefined ? sanitizeText(phone, 40) : existing.phone;
   const { phoneKey, nameKey } = customerIdentityKeys(nextName, nextPhone);
   if (!phoneKey) return res.status(400).json({ error: "phone must include digits" });
 
@@ -141,13 +147,27 @@ r.patch("/:id", requireRole("ADMIN", "RECEPTION", "TECHNICIAN"), async (req, res
         ...(phone !== undefined && { phone: nextPhone }),
         phoneKey,
         nameKey,
-        ...(email !== undefined && { email: email === null || email === "" ? null : String(email).trim() }),
-        ...(address !== undefined && { address: address === null || address === "" ? null : String(address).trim() }),
-        ...(notes !== undefined && { notes: notes === null || notes === "" ? null : String(notes).trim() }),
+        ...(email !== undefined && {
+          email:
+            email === null || email === ""
+              ? null
+              : (() => {
+                  const e = validateEmail(email);
+                  if (!e) throw Object.assign(new Error("Invalid email"), { code: "VALIDATION" });
+                  return e;
+                })(),
+        }),
+        ...(address !== undefined && {
+          address: address === null || address === "" ? null : sanitizeText(address, 300) || null,
+        }),
+        ...(notes !== undefined && {
+          notes: notes === null || notes === "" ? null : sanitizeText(notes, 2000) || null,
+        }),
       },
     });
     res.json(customer);
   } catch (e) {
+    if (e?.code === "VALIDATION") return res.status(400).json({ error: "Invalid email" });
     res.status(404).json({ error: "Not found" });
   }
 });

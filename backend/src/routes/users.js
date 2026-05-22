@@ -3,10 +3,12 @@ import bcrypt from "bcryptjs";
 import { prisma } from "../db.js";
 import { authMiddleware, requireRole } from "../middleware/auth.js";
 import { paginatedResult, parsePageQuery } from "../lib/pagination.js";
+import { bindCuidParams, sanitizeText, validateEmail, validatePassword } from "../lib/validate.js";
 
 const r = Router();
 r.use(authMiddleware);
 r.use(requireRole("ADMIN"));
+bindCuidParams(r, "id");
 
 r.get("/", async (req, res) => {
   const pq = parsePageQuery(req.query);
@@ -26,17 +28,11 @@ const CREATABLE_ROLES = new Set(["RECEPTION", "TECHNICIAN"]);
 
 r.post("/", async (req, res) => {
   const { email, password, name, role } = req.body || {};
-  const emailT = typeof email === "string" ? email.trim().toLowerCase() : "";
-  const nameT = typeof name === "string" ? name.trim() : "";
-  const passwordT = typeof password === "string" ? password : "";
+  const emailT = validateEmail(email);
+  const nameT = sanitizeText(name, 120);
+  const passwordT = validatePassword(password, 8);
   if (!emailT || !passwordT || !nameT || !role) {
-    return res.status(400).json({ error: "name, email, password and role are required" });
-  }
-  if (!emailT.includes("@") || emailT.length < 3) {
-    return res.status(400).json({ error: "Invalid email address" });
-  }
-  if (passwordT.length < 6) {
-    return res.status(400).json({ error: "Password must be at least 6 characters" });
+    return res.status(400).json({ error: "name, email, password (8+ chars) and role are required" });
   }
   if (!CREATABLE_ROLES.has(role)) {
     return res.status(400).json({ error: "Role must be RECEPTION or TECHNICIAN" });
@@ -58,22 +54,24 @@ r.patch("/:id", async (req, res) => {
   const { name, email, role, active, password } = req.body || {};
   const data = {};
   if (name !== undefined) {
-    if (typeof name !== "string" || !name.trim()) return res.status(400).json({ error: "Invalid name" });
-    data.name = name.trim();
+    const nameT = sanitizeText(name, 120);
+    if (!nameT) return res.status(400).json({ error: "Invalid name" });
+    data.name = nameT;
   }
   if (email !== undefined) {
-    if (typeof email !== "string" || !email.trim() || !email.includes("@")) {
-      return res.status(400).json({ error: "Invalid email" });
-    }
-    data.email = email.trim().toLowerCase();
+    const emailT = validateEmail(email);
+    if (!emailT) return res.status(400).json({ error: "Invalid email" });
+    data.email = emailT;
   }
-  if (role !== undefined) data.role = role;
+  if (role !== undefined) {
+    if (!CREATABLE_ROLES.has(role)) return res.status(400).json({ error: "Role must be RECEPTION or TECHNICIAN" });
+    data.role = role;
+  }
   if (active !== undefined) data.active = Boolean(active);
   if (password !== undefined && password !== "") {
-    if (typeof password !== "string" || password.length < 6) {
-      return res.status(400).json({ error: "Password must be at least 6 characters" });
-    }
-    data.passwordHash = await bcrypt.hash(password, 10);
+    const pw = validatePassword(password, 8);
+    if (!pw) return res.status(400).json({ error: "Password must be at least 8 characters" });
+    data.passwordHash = await bcrypt.hash(pw, 10);
   }
   if (Object.keys(data).length === 0) return res.status(400).json({ error: "No changes" });
   try {

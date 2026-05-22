@@ -3,13 +3,16 @@ import bcrypt from "bcryptjs";
 import { prisma } from "../db.js";
 import { signToken } from "../lib/jwt.js";
 import { authMiddleware } from "../middleware/auth.js";
+import { loginRateLimit } from "../middleware/security.js";
+import { sanitizeText, validateEmail, validatePassword } from "../lib/validate.js";
 
 const r = Router();
 
-r.post("/login", async (req, res) => {
-  const { email, password } = req.body || {};
-  if (!email || !password) return res.status(400).json({ error: "email and password required" });
-  const user = await prisma.user.findUnique({ where: { email } });
+r.post("/login", loginRateLimit, async (req, res) => {
+  const emailNorm = validateEmail(req.body?.email);
+  const password = typeof req.body?.password === "string" ? req.body.password : "";
+  if (!emailNorm || !password) return res.status(400).json({ error: "email and password required" });
+  const user = await prisma.user.findUnique({ where: { email: emailNorm } });
   if (!user || !user.active) return res.status(401).json({ error: "Invalid credentials" });
   const ok = await bcrypt.compare(password, user.passwordHash);
   if (!ok) return res.status(401).json({ error: "Invalid credentials" });
@@ -37,23 +40,22 @@ r.patch("/me", authMiddleware, async (req, res) => {
 
   const data = {};
   if (name !== undefined) {
-    if (typeof name !== "string" || !name.trim()) return res.status(400).json({ error: "Invalid name" });
-    data.name = name.trim();
+    const nameT = sanitizeText(name, 120);
+    if (!nameT) return res.status(400).json({ error: "Invalid name" });
+    data.name = nameT;
   }
   if (email !== undefined) {
-    if (typeof email !== "string" || !email.trim() || !email.includes("@")) {
-      return res.status(400).json({ error: "Invalid email" });
-    }
-    data.email = email.trim().toLowerCase();
+    const emailNorm = validateEmail(email);
+    if (!emailNorm) return res.status(400).json({ error: "Invalid email" });
+    data.email = emailNorm;
   }
   if (newPassword !== undefined && newPassword !== "") {
     if (!currentPassword) return res.status(400).json({ error: "currentPassword required to change password" });
     const ok = await bcrypt.compare(currentPassword, existing.passwordHash);
     if (!ok) return res.status(401).json({ error: "Current password incorrect" });
-    if (typeof newPassword !== "string" || newPassword.length < 6) {
-      return res.status(400).json({ error: "New password must be at least 6 characters" });
-    }
-    data.passwordHash = await bcrypt.hash(newPassword, 10);
+    const pw = validatePassword(newPassword, 8);
+    if (!pw) return res.status(400).json({ error: "New password must be at least 8 characters" });
+    data.passwordHash = await bcrypt.hash(pw, 10);
   }
 
   if (Object.keys(data).length === 0) return res.status(400).json({ error: "No changes" });

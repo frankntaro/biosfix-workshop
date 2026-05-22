@@ -12,9 +12,11 @@ import {
 import { renderJobInvoicePdf } from "../services/invoicePdf.js";
 import { customerIdentityKeys } from "../lib/customerIdentity.js";
 import { paginatedResult, parsePageQuery } from "../lib/pagination.js";
+import { bindCuidParams, clampSearchQuery, isCuid, sanitizeText } from "../lib/validate.js";
 
 const r = Router();
 r.use(authMiddleware);
+bindCuidParams(r, "id");
 
 async function logActivity(userId, action, entityType, entityId, metadata) {
   await prisma.activityLog.create({
@@ -105,7 +107,7 @@ async function notifyTechnicianAssigned(job, technicianId, assignerName) {
 }
 
 r.get("/search", requireRole("ADMIN", "RECEPTION", "TECHNICIAN"), async (req, res) => {
-  const q = (req.query.q || "").trim();
+  const q = clampSearchQuery(req.query.q);
   if (!q) {
     const pq = parsePageQuery(req.query);
     return res.json(paginatedResult({ items: [], total: 0, page: pq.page, pageSize: pq.pageSize }));
@@ -206,11 +208,13 @@ r.get("/:id", requireRole("ADMIN", "RECEPTION", "TECHNICIAN"), async (req, res) 
 r.post("/", requireRole("ADMIN", "RECEPTION"), async (req, res) => {
   const body = req.body || {};
   let customerId = body.customerId;
-  const { problemDescription, assignedTechnicianId, laborCost, partsCost } = body;
+  const { assignedTechnicianId, laborCost, partsCost } = body;
+  const problemDescription = sanitizeText(body.problemDescription, 4000);
   const deviceIn = body.device || {};
   if (!problemDescription) return res.status(400).json({ error: "problemDescription required" });
 
   if (customerId) {
+    if (!isCuid(customerId)) return res.status(400).json({ error: "Invalid customerId" });
     const exists = await prisma.customer.findUnique({ where: { id: customerId }, select: { id: true } });
     if (!exists) return res.status(400).json({ error: "customerId not found" });
   }
@@ -218,8 +222,8 @@ r.post("/", requireRole("ADMIN", "RECEPTION"), async (req, res) => {
   if (!customerId && body.customer) {
     const c = body.customer;
     if (!c.name || !c.phone) return res.status(400).json({ error: "customer.name and customer.phone required for new customer" });
-    const nameT = String(c.name).trim();
-    const phoneT = String(c.phone).trim();
+    const nameT = sanitizeText(c.name, 120);
+    const phoneT = sanitizeText(c.phone, 40);
     const { phoneKey, nameKey } = customerIdentityKeys(nameT, phoneT);
     if (!phoneKey) return res.status(400).json({ error: "customer.phone must include digits" });
 
@@ -237,9 +241,9 @@ r.post("/", requireRole("ADMIN", "RECEPTION"), async (req, res) => {
               phone: phoneT,
               phoneKey,
               nameKey,
-              email: c.email?.trim() || null,
-              address: c.address?.trim() || null,
-              notes: c.notes?.trim() || null,
+              email: c.email ? sanitizeText(c.email, 254) || null : null,
+              address: c.address ? sanitizeText(c.address, 300) || null : null,
+              notes: c.notes ? sanitizeText(c.notes, 2000) || null : null,
             },
           });
           return created.id;
@@ -265,13 +269,17 @@ r.post("/", requireRole("ADMIN", "RECEPTION"), async (req, res) => {
   if (!deviceIn.brand || !deviceIn.model) return res.status(400).json({ error: "device.brand and device.model required" });
 
   const jobNumber = await nextJobNumber();
+  if (assignedTechnicianId && !isCuid(assignedTechnicianId)) {
+    return res.status(400).json({ error: "Invalid assignedTechnicianId" });
+  }
+
   const device = await prisma.device.create({
     data: {
       customerId,
-      brand: deviceIn.brand,
-      model: deviceIn.model,
-      serialNumber: deviceIn.serialNumber || null,
-      conditionNotes: deviceIn.conditionNotes || null,
+      brand: sanitizeText(deviceIn.brand, 80),
+      model: sanitizeText(deviceIn.model, 80),
+      serialNumber: deviceIn.serialNumber ? sanitizeText(deviceIn.serialNumber, 80) || null : null,
+      conditionNotes: deviceIn.conditionNotes ? sanitizeText(deviceIn.conditionNotes, 1000) || null : null,
     },
   });
 
@@ -282,7 +290,7 @@ r.post("/", requireRole("ADMIN", "RECEPTION"), async (req, res) => {
       customerId,
       deviceId: device.id,
       problemDescription,
-      assignedTechnicianId: assignedTechnicianId || null,
+      assignedTechnicianId: assignedTechnicianId && isCuid(assignedTechnicianId) ? assignedTechnicianId : null,
       laborCost: canSetQuote ? num(laborCost, 0) : 0,
       partsCost: canSetQuote ? num(partsCost, 0) : 0,
       status: "PENDING",
@@ -321,11 +329,29 @@ r.patch("/:id", requireRole("ADMIN", "RECEPTION", "TECHNICIAN"), async (req, res
   if (role === "ADMIN") {
     if (laborCost !== undefined) data.laborCost = num(laborCost, 0);
     if (partsCost !== undefined) data.partsCost = num(partsCost, 0);
-    if (assignedTechnicianId !== undefined) data.assignedTechnicianId = assignedTechnicianId;
-    if (problemDescription !== undefined) data.problemDescription = problemDescription;
+    if (assignedTechnicianId !== undefined) {
+      if (assignedTechnicianId && !isCuid(assignedTechnicianId)) {
+        return res.status(400).json({ error: "Invalid assignedTechnicianId" });
+      }
+      data.assignedTechnicianId = assignedTechnicianId || null;
+    }
+    if (problemDescription !== undefined) {
+      const t = sanitizeText(problemDescription, 4000);
+      if (!t) return res.status(400).json({ error: "Invalid problemDescription" });
+      data.problemDescription = t;
+    }
   } else if (role === "RECEPTION") {
-    if (assignedTechnicianId !== undefined) data.assignedTechnicianId = assignedTechnicianId;
-    if (problemDescription !== undefined) data.problemDescription = problemDescription;
+    if (assignedTechnicianId !== undefined) {
+      if (assignedTechnicianId && !isCuid(assignedTechnicianId)) {
+        return res.status(400).json({ error: "Invalid assignedTechnicianId" });
+      }
+      data.assignedTechnicianId = assignedTechnicianId || null;
+    }
+    if (problemDescription !== undefined) {
+      const t = sanitizeText(problemDescription, 4000);
+      if (!t) return res.status(400).json({ error: "Invalid problemDescription" });
+      data.problemDescription = t;
+    }
   } else if (role === "TECHNICIAN") {
     if (existing.assignedTechnicianId !== req.user.sub) {
       return res.status(403).json({ error: "Not assigned to this job" });
@@ -396,10 +422,10 @@ r.patch("/:id/status", requireRole("ADMIN", "RECEPTION", "TECHNICIAN"), async (r
     if (existing.status !== "COMPLETE") {
       return res.status(400).json({ error: "Repair must be Complete before recording delivery" });
     }
-    const cn = String(collectedByName || "").trim();
-    const cp = String(collectedByPhone || "").trim();
+    const cn = sanitizeText(collectedByName, 120);
+    const cp = sanitizeText(collectedByPhone, 40);
     if (!cn || !cp) return res.status(400).json({ error: "collectedByName and collectedByPhone required (who took the device)" });
-    const sig = String(collectionSignature || "").trim();
+    const sig = typeof collectionSignature === "string" ? collectionSignature.trim() : "";
     if (sig.length > 12000) return res.status(400).json({ error: "collectionSignature too long" });
   }
 
@@ -419,9 +445,9 @@ r.patch("/:id/status", requireRole("ADMIN", "RECEPTION", "TECHNICIAN"), async (r
   if (status === "COMPLETE") updates.completedAt = new Date();
   if (status === "DELIVERED") {
     updates.deliveredAt = new Date();
-    updates.collectedByName = String(collectedByName || "").trim();
-    updates.collectedByPhone = String(collectedByPhone || "").trim();
-    const sig = String(collectionSignature || "").trim();
+    updates.collectedByName = sanitizeText(collectedByName, 120);
+    updates.collectedByPhone = sanitizeText(collectedByPhone, 40);
+    const sig = typeof collectionSignature === "string" ? collectionSignature.trim() : "";
     updates.collectionSignature = sig.length ? sig.slice(0, 12000) : null;
   }
   if (status !== "DELIVERED" && existing.status === "DELIVERED" && isDesk) {
@@ -442,7 +468,7 @@ r.patch("/:id/status", requireRole("ADMIN", "RECEPTION", "TECHNICIAN"), async (r
         jobId: j.id,
         fromStatus: existing.status,
         toStatus: status,
-        notes: notes || null,
+        notes: notes != null ? sanitizeText(notes, 2000) || null : null,
         technicianId: req.user.sub,
       },
     });
