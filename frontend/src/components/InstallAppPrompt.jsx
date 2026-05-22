@@ -33,10 +33,7 @@ function dismissPrompt() {
   }
 }
 
-/**
- * Scroll-triggered install banner (not a sidebar button). Shown when the user scrolls
- * and the app can be installed (Chrome/Edge) or on iOS with Add to Home Screen steps.
- */
+/** Small scroll-triggered chip: “Install app” only */
 export default function InstallAppPrompt() {
   const { pathname } = useLocation();
   const { installable, installed, promptInstall } = usePwa();
@@ -78,13 +75,11 @@ export default function InstallAppPrompt() {
   if (!visible) return null;
 
   const onInstall = async () => {
-    if (installable) {
-      await promptInstall();
-      return;
-    }
+    if (installable) await promptInstall();
   };
 
-  const onDismiss = () => {
+  const onDismiss = (e) => {
+    e.stopPropagation();
     dismissPrompt();
     setDismissed(true);
   };
@@ -93,60 +88,30 @@ export default function InstallAppPrompt() {
 
   return (
     <div
-      role="dialog"
-      aria-labelledby="install-prompt-title"
-      aria-describedby="install-prompt-desc"
       className={`fixed z-[45] print:hidden pointer-events-none ${
         inAppShell ? "left-0 right-0 md:left-56" : "inset-x-0"
-      } bottom-0 pb-[env(safe-area-inset-bottom)]`}
+      } bottom-0 pb-[max(0.5rem,env(safe-area-inset-bottom))]`}
     >
-      <div className="pointer-events-auto mx-3 mb-3 sm:mx-4 sm:mb-4 rounded-2xl border border-cyan-500/35 dark:border-cyan-400/25 bg-gradient-to-r from-cyan-950 via-teal-900 to-cyan-950 text-white shadow-2xl shadow-cyan-950/50 overflow-hidden animate-[slideUp_0.35s_ease-out]">
-        <div className="flex flex-col sm:flex-row sm:items-center gap-4 p-4 sm:p-5">
-          <div className="flex items-center gap-4 min-w-0 flex-1">
-            <img
-              src="/install-app-icon.png"
-              alt=""
-              width={72}
-              height={72}
-              className="h-[4.5rem] w-[4.5rem] shrink-0 rounded-2xl ring-2 ring-white/20 shadow-lg"
-            />
-            <div className="min-w-0">
-              <p id="install-prompt-title" className="font-bold text-base sm:text-lg leading-snug">
-                Install BIOSFIX on this device
-              </p>
-              <p id="install-prompt-desc" className="text-sm text-cyan-100/90 mt-1 leading-relaxed">
-                {installable
-                  ? "Get the workshop app on your home screen or desktop — works faster and supports offline jobs."
-                  : "On iPhone or iPad: tap Share, then Add to Home Screen. On Android: use the browser menu Install app."}
-              </p>
-            </div>
-          </div>
-          <div className="flex flex-col sm:flex-row gap-2 shrink-0 w-full sm:w-auto">
-            {installable ? (
-              <button
-                type="button"
-                onClick={onInstall}
-                className="w-full sm:w-auto rounded-xl bg-white text-cyan-950 font-semibold px-5 py-3 text-sm touch-manipulation min-h-[44px] hover:bg-cyan-50 transition-colors"
-              >
-                Install now
-              </button>
-            ) : (
-              <button
-                type="button"
-                onClick={onDismiss}
-                className="w-full sm:w-auto rounded-xl bg-white/15 border border-white/25 font-semibold px-5 py-3 text-sm touch-manipulation min-h-[44px] hover:bg-white/25"
-              >
-                Got it
-              </button>
-            )}
-            <button
-              type="button"
-              onClick={onDismiss}
-              className="w-full sm:w-auto rounded-xl border border-white/20 text-cyan-100 px-5 py-3 text-sm touch-manipulation min-h-[44px] hover:bg-white/10"
-            >
-              Not now
-            </button>
-          </div>
+      <div className="pointer-events-auto flex justify-end px-3 pb-2 sm:px-4 animate-[slideUp_0.3s_ease-out]">
+        <div className="inline-flex items-center gap-0.5 rounded-full border border-cyan-500/30 dark:border-cyan-400/25 bg-cyan-900/95 dark:bg-slate-900/95 text-white shadow-md backdrop-blur-sm pl-3 pr-0.5 py-0.5">
+          <button
+            type="button"
+            onClick={onInstall}
+            className="text-xs font-semibold tracking-wide py-2 pr-2 touch-manipulation hover:text-cyan-200 transition-colors"
+            aria-label="Install app"
+          >
+            Install app
+          </button>
+          <button
+            type="button"
+            onClick={onDismiss}
+            className="rounded-full p-1.5 text-cyan-200/80 hover:bg-white/10 hover:text-white touch-manipulation min-h-[32px] min-w-[32px] flex items-center justify-center"
+            aria-label="Dismiss install prompt"
+          >
+            <span className="text-sm leading-none" aria-hidden>
+              ×
+            </span>
+          </button>
         </div>
       </div>
     </div>
