@@ -1,6 +1,6 @@
 # BIOSFIX Technology Workshop System
 
-Full-stack workshop management aligned with your proposal: **React + Vite**, **Node/Express**, **PostgreSQL + Prisma**, **JWT roles** (Admin / Reception / Technician), **SMS hooks** (textbee.dev), **PWA shell** (installable app + asset caching). Job numbers **BF001**, repair statuses, dashboard KPIs, payments, printable receipts, and SMS log.
+Full-stack workshop management aligned with: **React + Vite**, **Node/Express**, **PostgreSQL + Prisma**, **JWT roles** (Admin / Reception / Technician), **SMS hooks** (textbee.dev), **PWA shell** (installable app + asset caching). Job numbers **BF001**, repair statuses, dashboard KPIs, payments, printable receipts, and SMS log.
 
 ## Prerequisites
 
@@ -66,18 +66,8 @@ In addition:
 - **Sync:** When the browser goes **online**, after **login**, or when you press **Sync now** in the sidebar, queued jobs are posted to `POST /jobs` in order. A mutex prevents duplicate parallel syncs.
 - **Limits:** Only **new job creation** is queued (not payments or status changes). If the session expires (401), fix auth and tap **Sync now** again.
 
-## Deploy on Render (GitHub → Blueprint)
 
-Repo includes `render.yaml` for a **PostgreSQL database**, **Node API** (`backend/`), and **static frontend** (`frontend/`).
-
-1. Push this repo to GitHub (`frankntaro/biosfix-workshop`).
-2. [Render Dashboard](https://dashboard.render.com/) → **New** → **Blueprint** → connect the repo → apply `render.yaml`.  
-   If Blueprint fails on `plan: free` for the static site, pull latest `main` (frontend has no `plan` in `render.yaml`).
-3. When deploy finishes, open the **biosfix-api** service → **Environment** → set **`FRONTEND_ORIGIN`** to your static site URL (e.g. `https://biosfix-web.onrender.com`, no trailing slash). Redeploy the API if needed.
-4. Optional: set `TEXTBEE_API_KEY`, `TEXTBEE_DEVICE_ID`, `WORKSHOP_PHONE` on the API service.
-5. **Test users** — the API build runs `npm run db:seed` automatically (Render free tier has no Shell). Logins: `admin@biosfix.com` / `admin123`, etc.
-
-   To seed manually from your PC (optional): Render → **biosfix-db** → **Connections** → copy **External Database URL**, then:
+   n:
 
    ```powershell
    cd backend
