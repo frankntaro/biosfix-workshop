@@ -22,13 +22,6 @@ npm run dev
 
 API: `http://localhost:4000` · Health: `GET /health`
 
-**Seed logins**
-
-| Email | Password | Role |
-|--------|------------|------|
-| admin@biosfix.com | admin123 | ADMIN |
-| reception@biosfix.com | reception123 | RECEPTION |
-| tech@biosfix.com | tech123 | TECHNICIAN |
 
 ## 2. Web app
 
