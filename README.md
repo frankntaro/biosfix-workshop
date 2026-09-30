@@ -12,7 +12,7 @@ Full-stack workshop management aligned with: **React + Vite**, **Node/Express**,
 ## SMS (textbee.dev)
 ## PDF invoice
 ## Offline queue and sync
-## Deployment(Verce
+## Deployment(Render.com)
 ### A) API (Node + Postgres)
 
 ## Security
